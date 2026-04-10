@@ -49,7 +49,7 @@ Browser (HTML/JS)  ←→  Eel WebSocket / HTTP  ←→  Python (main.py + core/
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-org>/faktury-scanner-pro.git
+git clone https://github.com/Lucifernoo/faktury-scanner-pro.git
 cd faktury-scanner-pro
 
 # Create and activate a virtual environment (recommended)
