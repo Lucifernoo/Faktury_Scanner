@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faktury Scanner</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app">
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>Faktury Scanner</h1>
+      <button type="button" class="btn-about" id="btn-about" aria-label="Про програму" title="Про програму">
+        <svg class="btn-about__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span class="btn-about__ver">v1.0</span>
+      </button>
+    </header>
+
+    <main class="app-main">
+      <section class="card-panel" aria-label="Дії">
+        <div class="tile-grid">
+          <button type="button" class="tile tile--blue" id="btn-upload-one" title="Завантажити один PDF-рахунок">
+            <span class="tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </span>
+            <span class="tile__label">Завантажити 1 рахунок</span>
+          </button>
+
+          <button type="button" class="tile tile--orange" id="btn-folder" title="Обрати папку з PDF">
+            <span class="tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <span class="tile__label">Обрати папку</span>
+          </button>
+
+          <button type="button" class="tile tile--green" id="btn-excel" disabled title="Зберегти результати в Excel">
+            <span class="tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M12 13h2"/><path d="M12 17h2"/></svg>
+            </span>
+            <span class="tile__label">Зберегти в Excel</span>
+          </button>
+
+          <button type="button" class="tile tile--purple tile--wide" id="btn-analytics" title="Аналітика">
+            <span class="tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </span>
+            <span class="tile__label">Аналітика</span>
+          </button>
+
+          <button type="button" class="tile tile--gray tile--wide" id="btn-settings" title="Налаштування">
+            <span class="tile__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </span>
+            <span class="tile__label">Налаштування</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn-start-scan" id="start-btn" disabled title="Спочатку оберіть файл або папку">
+          <span class="btn-start-scan__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </span>
+          <span id="start-btn-label">Обробити</span>
+        </button>
+
+        <p class="folder-hint">Шлях: <span id="selected-path-display" class="selected-path-display">Нічого не обрано</span></p>
+      </section>
+
+      <div id="progress-section" class="progress-strip" aria-label="Прогрес обробки">
+        <div class="progress app-progress" role="presentation">
+          <div
+            id="progress-bar-fill"
+            class="progress-bar app-progress-bar"
+            role="progressbar"
+            style="width: 0%"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
+        </div>
+      </div>
+
+      <section class="card-panel card-panel--log" aria-label="Журнал подій">
+        <div class="log-section-head">
+          <h2 class="log-section-title">Журнал</h2>
+          <button
+            type="button"
+            class="log-toggle-btn"
+            id="log-toggle-btn"
+            data-bs-toggle="collapse"
+            data-bs-target="#log-collapse"
+            aria-expanded="false"
+            aria-controls="log-collapse"
+          >
+            Показати журнал
+          </button>
+        </div>
+        <div id="log-collapse" class="collapse">
+          <div id="log" class="log-panel" role="log" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Налаштування -->
+  <div id="modal-settings" class="modal-backdrop" aria-hidden="true" hidden>
+    <div class="modal-card modal-card--settings" role="dialog" aria-labelledby="modal-settings-title">
+      <h2 id="modal-settings-title" class="modal-title">Налаштування</h2>
+      <label class="modal-label" for="sett-edrpou">ЄДРПОУ нашої компанії (ігноруються в парсері)</label>
+      <p class="modal-hint">По одному значенню в рядку</p>
+      <textarea id="sett-edrpou" class="modal-textarea modal-textarea--compact" rows="3" autocomplete="off"></textarea>
+
+      <label class="modal-label" for="sett-name">Ключові слова вашої компанії</label>
+      <p class="modal-hint">
+        По одному значенню в рядку. Парсер використовує їх, щоб не сплутати постачальника з вашою фірмою: якщо знайдена
+        кандидатна назва контрагента містить хоча б один із цих фрагментів (без урахування регістру), вона ігнорується —
+        шукається інший варіант назви.
+      </p>
+      <textarea id="sett-name" class="modal-textarea modal-textarea--compact" rows="3" autocomplete="organization"></textarea>
+
+      <label class="modal-label" for="sett-cols">Назви колонок для Excel</label>
+      <p class="modal-hint modal-hint--badges">
+        <span class="kbd-hint">{дата}</span>
+        <span class="kbd-hint">{назва}</span>
+        <span class="kbd-hint">{єдрпоу}</span>
+        <span class="kbd-hint">{iban}</span>
+        <span class="kbd-hint">{сума}</span>
+      </p>
+      <textarea id="sett-cols" class="modal-textarea modal-textarea--cols-wide" rows="5" placeholder="По одному стовпцю в рядку або через кому"></textarea>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-btn modal-btn--ghost" id="modal-settings-cancel">Скасувати</button>
+        <button type="button" class="modal-btn modal-btn--primary" id="modal-settings-save">Зберегти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Про програму -->
+  <div id="modal-about" class="modal-backdrop modal-backdrop--about" aria-hidden="true" hidden>
+    <div class="modal-card modal-card--about" role="dialog" aria-labelledby="modal-about-title">
+      <div class="about-modal__head">
+        <img src="assets/logo.png" alt="" class="about-modal__logo" width="52" height="52">
+        <h2 id="modal-about-title" class="about-modal__title">Faktury Scanner</h2>
+      </div>
+      <p class="about-modal__text">
+        Інструмент для автоматичного парсингу телеком-рахунків. Версія 1.0 (B2B Edition)
+      </p>
+      <p class="about-modal__author">
+        Розробка та підтримка: <span class="about-modal__brand">Luciferno</span>
+      </p>
+      <a
+        class="about-modal__link-btn"
+        href="https://t.me/lucifernoo"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Підтримка в Telegram</a>
+      <div class="modal-actions modal-actions--single about-modal__actions">
+        <button type="button" class="modal-btn modal-btn--primary" id="modal-about-close">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Аналітика -->
+  <div id="modal-analytics" class="modal-backdrop" aria-hidden="true" hidden>
+    <div class="modal-card modal-card--wide" role="dialog" aria-labelledby="modal-analytics-title">
+      <h2 id="modal-analytics-title" class="modal-title">Витрати за контрагентами</h2>
+      <p id="modal-analytics-error" class="modal-error" hidden></p>
+      <div class="modal-chart-wrap">
+        <img id="modal-analytics-img" class="modal-chart-img" alt="Графік витрат" hidden>
+      </div>
+      <div class="modal-actions modal-actions--single">
+        <button type="button" class="modal-btn modal-btn--primary" id="modal-analytics-close">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="/eel.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

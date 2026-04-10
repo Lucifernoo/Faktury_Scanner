@@ -1,0 +1,21 @@
+# Среда и кэш
+.venv/
+env/
+__pycache__/
+
+# Сборка программы
+build/
+dist/
+*.spec
+
+# Медиа и документы
+tesseract_bin/
+*.pdf
+*.xlsx
+*.png
+*.jpg
+test_files/
+
+# Архивы кода
+archive/
+legacy/

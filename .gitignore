@@ -1,0 +1,44 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# PyArmor
+.pyarmor/
+
+# Inno Setup — каталог с готовым установщиком (см. OutputDir в .iss)
+installer_output/
+
+# Логи и отладка сборки
+*.log
+warn-*.txt
+
+# IDE / редакторы
+.idea/
+.vscode/
+*.swp
+*~
+
+# ОС
+Thumbs.db
+.DS_Store
+
+# Опционально: локальные артефакты тестов
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Если позже появится npm во фронтенде
+node_modules/
