@@ -117,12 +117,6 @@ Generated artifacts (not committed in a clean repo): `dist/`, `build/`, `Faktury
 
 ---
 
-## 📄 License
-
-Specify your license here (e.g. MIT, proprietary).
-
----
-
 <p align="center">
   Built with ❤️ for Ukrainian invoice automation
 </p>
