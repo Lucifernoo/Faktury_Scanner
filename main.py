@@ -25,7 +25,7 @@ from core.exporter import ExcelExporter
 from core.parser import InvoiceParseSkipError, InvoiceParser
 
 APP_DISPLAY_NAME: Final[str] = "Faktury Scanner PRO"
-APP_VERSION: Final[str] = "1.1"
+APP_VERSION: Final[str] = "1.1.1"
 
 
 def _project_root() -> str:
