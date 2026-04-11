@@ -290,9 +290,25 @@ body.app {
 }
 
 .btn-start-scan .btn-start-scan__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   width: 18px;
   height: 18px;
+  line-height: 0;
   opacity: 0.9;
+}
+
+.btn-start-scan .btn-start-scan__icon svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.btn-start-scan #start-btn-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
 }
 
 .folder-hint {

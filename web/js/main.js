@@ -99,6 +99,44 @@
     inst.show();
   }
 
+  /**
+   * Підтягує версію та назву з Python (`get_app_meta`), щоб UI збігався з бекендом і Inno.
+   * @returns {Promise<void>}
+   */
+  async function applyVersionFromBackend() {
+    try {
+      /** @type {{ version?: string; display_name?: string } | null | undefined} */
+      const meta = await eel.get_app_meta()();
+      if (!meta || typeof meta.version !== 'string') {
+        return;
+      }
+      const verEl = document.querySelector('.btn-about__ver');
+      if (verEl) {
+        verEl.textContent = 'v' + meta.version;
+      }
+      const aboutLine = document.getElementById('about-modal-version-line');
+      if (aboutLine) {
+        aboutLine.textContent =
+          'Інструмент для автоматичного парсингу телеком-рахунків. Версія ' +
+          meta.version +
+          ' (B2B Edition)';
+      }
+      const aboutTitle = document.getElementById('modal-about-title');
+      if (aboutTitle && typeof meta.display_name === 'string' && meta.display_name.trim()) {
+        aboutTitle.textContent = meta.display_name;
+      }
+      const headerTitle = document.querySelector('.app-header h1');
+      if (headerTitle && typeof meta.display_name === 'string' && meta.display_name.trim()) {
+        headerTitle.textContent = meta.display_name;
+      }
+      if (typeof meta.display_name === 'string' && meta.display_name.trim()) {
+        document.title = meta.display_name + ' | v' + meta.version;
+      }
+    } catch (_e) {
+      /* залишаємо статичний HTML */
+    }
+  }
+
   function refreshSelectionUI() {
     const pathEl = document.getElementById('selected-path-display');
     const startBtn = document.getElementById('start-btn');
@@ -179,6 +217,7 @@
       if (response.error === 'user_canceled') {
         return;
       }
+      appendLogLine('[помилка] Excel: ' + (response.error || ''));
       window.alert(response.error || 'Помилка збереження');
     } catch (e) {
       window.alert(String(e));
@@ -314,6 +353,7 @@
     const logToggleBtn = document.getElementById('log-toggle-btn');
 
     refreshSelectionUI();
+    void applyVersionFromBackend();
 
     if (logCollapseEl && logToggleBtn) {
       logCollapseEl.addEventListener('shown.bs.collapse', function () {

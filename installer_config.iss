@@ -5,7 +5,7 @@
 [Setup]
 AppId={{C2FE7C9E-07F2-4B48-8BAE-25EA9DE449A0}}
 AppName={#MyAppName}
-AppVersion=1.0.0
+AppVersion=1.1
 AppPublisher={#MyAppName}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}

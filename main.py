@@ -9,7 +9,7 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog
-from typing import Any
+from typing import Any, Final
 
 import eel
 import gevent
@@ -24,10 +24,13 @@ from core.config_manager import (
 from core.exporter import ExcelExporter
 from core.parser import InvoiceParseSkipError, InvoiceParser
 
+APP_DISPLAY_NAME: Final[str] = "Faktury Scanner PRO"
+APP_VERSION: Final[str] = "1.1"
+
 
 def _project_root() -> str:
-    """Корінь проєкту (режим розробки): батьківська тека відносно ``main.py``."""
-    return os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
+    """Корінь проєкту (тека, де лежить ``main.py``) — для ``web/``, ``tesseract_bin/`` у режимі розробки."""
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def _resource_root() -> str:
@@ -59,6 +62,16 @@ def _configure_tesseract_bundle_paths() -> None:
 _configure_tesseract_bundle_paths()
 _web_dir = os.path.join(_resource_root(), "web")
 eel.init(_web_dir)
+
+
+@eel.expose
+def get_app_meta() -> dict[str, str]:
+    """Метадані застосунку для UI (єдине джерело версії з бекенду)."""
+    return {
+        "version": APP_VERSION,
+        "display_name": APP_DISPLAY_NAME,
+    }
+
 
 _status_queue: queue.Queue[tuple[str, str]] = queue.Queue()
 _progress_queue: queue.Queue[float] = queue.Queue()
@@ -270,6 +283,65 @@ def get_current_parsed_data() -> list[dict[str, Any]]:
         return [dict(r) for r in _current_data]
 
 
+def _ask_save_excel_path_worker(result_q: queue.Queue[tuple[str, str | None]]) -> None:
+    """
+    Tk «Зберегти як…» у окремому потоці: callback Eel працює під gevent,
+    інакше діалог часто не з’являється або ховається за вікном Chrome.
+    """
+    root: tk.Tk | None = None
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        try:
+            root.update_idletasks()
+            root.lift()
+            root.focus_force()
+        except tk.TclError:
+            pass
+
+        docs = os.path.join(os.path.expanduser("~"), "Documents")
+        initialdir = docs if os.path.isdir(docs) else os.path.expanduser("~")
+
+        path = filedialog.asksaveasfilename(
+            parent=root,
+            initialdir=initialdir,
+            initialfile="Реєстр_рахунків.xlsx",
+            title="Зберегти реєстр як...",
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+        )
+        if path:
+            result_q.put(("ok", str(path)))
+        else:
+            result_q.put(("cancel", None))
+    except Exception as exc:
+        result_q.put(("error", str(exc)))
+    finally:
+        if root is not None:
+            try:
+                root.destroy()
+            except tk.TclError:
+                pass
+
+
+def _ask_save_excel_path_blocking() -> tuple[str, str | None]:
+    """Повертає (\"ok\", шлях) | (\"cancel\", None) | (\"error\", текст)."""
+    result_q: queue.Queue[tuple[str, str | None]] = queue.Queue(maxsize=1)
+    th = threading.Thread(target=_ask_save_excel_path_worker, args=(result_q,), daemon=True)
+    th.start()
+    th.join(timeout=300)
+    if th.is_alive():
+        return (
+            "error",
+            "Діалог збереження не відповів учасно. Закрийте зайві вікна та спробуйте ще раз.",
+        )
+    try:
+        return result_q.get_nowait()
+    except queue.Empty:
+        return ("error", "Не вдалося отримати результат діалогу збереження.")
+
+
 @eel.expose
 def save_to_excel_with_dialog(parsed_data: list[dict[str, Any]]) -> dict[str, Any]:
     """
@@ -279,22 +351,15 @@ def save_to_excel_with_dialog(parsed_data: list[dict[str, Any]]) -> dict[str, An
     if not isinstance(parsed_data, list) or not parsed_data:
         return {"ok": False, "error": "no_data"}
 
-    root = tk.Tk()
-    root.attributes("-topmost", True)
-    root.withdraw()
-    try:
-        file_path = filedialog.asksaveasfilename(
-            parent=root,
-            initialfile="Реєстр_рахунків.xlsx",
-            title="Зберегти реєстр як...",
-            defaultextension=".xlsx",
-            filetypes=[("Excel files", "*.xlsx")],
-        )
-    finally:
-        root.destroy()
-
-    if not file_path:
+    kind, payload = _ask_save_excel_path_blocking()
+    if kind == "cancel":
         return {"ok": False, "error": "user_canceled"}
+    if kind == "error":
+        return {"ok": False, "error": payload or "dialog_error"}
+    if kind != "ok" or not payload:
+        return {"ok": False, "error": "user_canceled"}
+
+    file_path = payload
 
     cfg = ConfigManager().load()
     cols = list(cfg.get("export_columns") or DEFAULT_SETTINGS["export_columns"])

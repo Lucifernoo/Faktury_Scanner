@@ -121,10 +121,11 @@ class ExcelExporter:
         def _save_workbook(workbook: Workbook) -> None:
             try:
                 workbook.save(path)
-            except PermissionError as exc:
+            except (PermissionError, OSError) as exc:
+                name = os.path.basename(path)
                 raise PermissionError(
-                    "Файл Excel відкритий в іншій програмі (наприклад, Microsoft Excel). "
-                    f"Закрийте «{os.path.basename(path)}» і натисніть «Зберегти» ще раз."
+                    f"Не вдалося записати «{name}». Можливі причини: файл відкритий у Excel або іншій "
+                    f"програмі; папку блокує OneDrive / антивірус; немає прав на запис. Деталі: {exc!r}"
                 ) from exc
 
         if not os.path.isfile(path):
@@ -137,9 +138,11 @@ class ExcelExporter:
         else:
             try:
                 wb = load_workbook(path)
-            except PermissionError as exc:
+            except (PermissionError, OSError) as exc:
+                name = os.path.basename(path)
                 raise PermissionError(
-                    "Не вдалося відкрити файл реєстру: він відкритий в іншій програмі. Закрийте файл і повторіть."
+                    f"Не вдалося відкрити «{name}» для допису. Перевірте, чи файл не відкритий у Excel, "
+                    f"чи не блокує доступ OneDrive/антивірус. Деталі: {exc!r}"
                 ) from exc
             ws = wb.active
             assert ws is not None
