@@ -6,7 +6,9 @@ import os
 import queue
 import sys
 import threading
+import tkinter as tk
 from pathlib import Path
+from tkinter import filedialog
 from typing import Any
 
 import eel
@@ -141,9 +143,6 @@ def _process_folder_worker(folder_path: str) -> None:
 
 @eel.expose
 def select_folder() -> str:
-    import tkinter as tk
-    from tkinter import filedialog
-
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
@@ -155,9 +154,6 @@ def select_folder() -> str:
 @eel.expose
 def select_file() -> str:
     """Лише діалог вибору одного PDF — без парсингу."""
-    import tkinter as tk
-    from tkinter import filedialog
-
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
@@ -265,6 +261,59 @@ def _export_worker() -> None:
 def export_to_excel() -> None:
     thread = threading.Thread(target=_export_worker, daemon=True)
     thread.start()
+
+
+@eel.expose
+def get_current_parsed_data() -> list[dict[str, Any]]:
+    """Знімок рядків для експорту (те саме, що у внутрішньому буфері після парсингу)."""
+    with _current_data_lock:
+        return [dict(r) for r in _current_data]
+
+
+@eel.expose
+def save_to_excel_with_dialog(parsed_data: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Діалог «Зберегти як…», запис через ``ExcelExporter(..., file_path=...)``.
+    ``parsed_data`` — список словників (як із ``get_current_parsed_data``).
+    """
+    if not isinstance(parsed_data, list) or not parsed_data:
+        return {"ok": False, "error": "no_data"}
+
+    root = tk.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()
+    try:
+        file_path = filedialog.asksaveasfilename(
+            parent=root,
+            initialfile="Реєстр_рахунків.xlsx",
+            title="Зберегти реєстр як...",
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+        )
+    finally:
+        root.destroy()
+
+    if not file_path:
+        return {"ok": False, "error": "user_canceled"}
+
+    cfg = ConfigManager().load()
+    cols = list(cfg.get("export_columns") or DEFAULT_SETTINGS["export_columns"])
+    exporter = ExcelExporter(ConfigManager(), file_path=file_path)
+
+    try:
+        for item in parsed_data:
+            data = {k: v for k, v in dict(item).items() if not str(k).startswith("_")}
+            exporter.append_to_excel(data, export_columns=cols)
+        with _current_data_lock:
+            _current_data.clear()
+        _notify_export_state(False)
+        return {"ok": True, "path": file_path}
+    except PermissionError as e:
+        return {"ok": False, "error": str(e)}
+    except OSError:
+        return {"ok": False, "error": "Не вдалося зберегти Excel (доступ або диск)."}
+    except Exception as e:
+        return {"ok": False, "error": f"Помилка збереження: {e}"}
 
 
 @eel.expose

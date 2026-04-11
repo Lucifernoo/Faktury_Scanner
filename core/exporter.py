@@ -27,8 +27,16 @@ def get_registry_path(filename: str = _DEFAULT_NAME) -> str:
 class ExcelExporter:
     """Дописує рядки в Excel; заголовки та порядок колонок — з ``export_columns`` (або settings.json)."""
 
-    def __init__(self, config_manager: ConfigManager | None = None) -> None:
+    def __init__(
+        self,
+        config_manager: ConfigManager | None = None,
+        file_path: str | None = None,
+    ) -> None:
         self._config_mgr = config_manager or ConfigManager()
+        if file_path:
+            self.file_path = os.path.abspath(_resolve_filepath(file_path))
+        else:
+            self.file_path = get_registry_path()
 
     @staticmethod
     def _normalize_header(header: str) -> str:
@@ -97,19 +105,18 @@ class ExcelExporter:
     def append_to_excel(
         self,
         data: dict[str, Any],
-        filepath: str = _DEFAULT_NAME,
         export_columns: list[str] | None = None,
     ) -> str:
         """
         Створює файл із заголовками з налаштувань / аргументу або дописує рядок.
-        Якщо ``export_columns`` не передано — читається ``export_columns`` з ``ConfigManager``.
+        Шлях файлу — ``self.file_path``. Якщо ``export_columns`` не передано — з ``ConfigManager``.
         """
         cfg_cols = export_columns
         if cfg_cols is None:
             cfg_cols = list(self._config_mgr.load().get("export_columns") or DEFAULT_SETTINGS["export_columns"])
 
         cols, row = self.build_row_for_columns(data, cfg_cols)
-        path = _resolve_filepath(filepath)
+        path = self.file_path
 
         def _save_workbook(workbook: Workbook) -> None:
             try:
@@ -117,7 +124,7 @@ class ExcelExporter:
             except PermissionError as exc:
                 raise PermissionError(
                     "Файл Excel відкритий в іншій програмі (наприклад, Microsoft Excel). "
-                    "Закрийте «Реєстр_рахунків.xlsx» і натисніть «Зберегти» ще раз."
+                    f"Закрийте «{os.path.basename(path)}» і натисніть «Зберегти» ще раз."
                 ) from exc
 
         if not os.path.isfile(path):

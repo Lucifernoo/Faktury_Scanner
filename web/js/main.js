@@ -36,7 +36,7 @@
     return 'записів';
   }
 
-  function on_registry_saved(count) {
+  function on_registry_saved(count, savedPath) {
     const log = document.getElementById('log');
     if (!log) return;
     const line = document.createElement('div');
@@ -51,8 +51,9 @@
     const text = document.createElement('span');
     text.className = 'log-registry__text';
     const n = parseInt(count, 10) || 0;
-    text.textContent =
-      'Додано ' + n + ' ' + pluralZapysiv(n) + ' до Реєстру_рахунків.xlsx';
+    text.textContent = savedPath
+      ? 'Додано ' + n + ' ' + pluralZapysiv(n) + ': ' + savedPath
+      : 'Додано ' + n + ' ' + pluralZapysiv(n) + ' до Реєстр_рахунків.xlsx';
 
     line.appendChild(iconWrap);
     line.appendChild(text);
@@ -161,8 +162,27 @@
     eel.run_task(selectedPath, selectedType);
   }
 
-  function onExportExcel() {
-    eel.export_to_excel();
+  async function onExportExcel() {
+    try {
+      const currentParsedData = await eel.get_current_parsed_data()();
+      if (!currentParsedData || !currentParsedData.length) {
+        appendLogLine('[помилка] немає даних для експорту');
+        return;
+      }
+      const response = await eel.save_to_excel_with_dialog(currentParsedData)();
+      if (!response) return;
+      if (response.ok) {
+        expandLogCollapse();
+        on_registry_saved(currentParsedData.length, response.path);
+        return;
+      }
+      if (response.error === 'user_canceled') {
+        return;
+      }
+      window.alert(response.error || 'Помилка збереження');
+    } catch (e) {
+      window.alert(String(e));
+    }
   }
 
   function openModal(el) {
